@@ -15,6 +15,7 @@ dependencies = [
     "tifffile>=2024.1",
     "pillow>=10.0",
     "plotly>=5.20",
+    "matplotlib>=3.8",
     "tqdm>=4.66",
 ]
 

@@ -6,6 +6,13 @@ image patch around the cell. 115 paired landmark cells, frozen DINOv2-small
 features, supervised-contrastive + Sinkhorn cross-modality alignment, no
 test-time access to landmark coordinates.
 
+![pipeline schematic](viz/schematic.png)
+
+*Source volumes → 80 µm patches around 115 paired landmark cells →
+`hard_intra` augmentations (×800/cell) → frozen DINOv2-small (3 scales) →
+trained MLP 1152→256→64 → SupCon (intra-modality) + Sinkhorn (cross-modality)
+→ trained 64-d embeddings (PCA-2D, same color = same cell, ● iv ◆ ex).*
+
 ## Headline
 
 | Metric | Value |
@@ -76,12 +83,14 @@ three coupled panels:
 │   ├── augmentations.py # rotation augmentation presets
 │   └── alignment.py     # Sinkhorn cross-modality alignment loss
 ├── scripts/
-│   ├── reproduce_w8.py  # end-to-end orchestrator (train → install → regen viz)
-│   └── download_data.py # fetch the 3 dataset files from Dropbox into data/
+│   ├── reproduce_w8.py    # end-to-end orchestrator (train → install → regen viz)
+│   ├── download_data.py   # fetch the 3 dataset files from Dropbox into data/
+│   └── build_schematic.py # regenerate the README pipeline diagram
 ├── viz/
 │   ├── generate_data.py             # build the data JSON from a trained projector
 │   ├── generate_html.py             # render the data JSON to an interactive HTML
-│   └── dino_repr_interactive.html   # bundled visualization (15 MB)
+│   ├── dino_repr_interactive.html   # bundled visualization (15 MB)
+│   └── schematic.png                # bundled pipeline diagram (~2 MB)
 ├── results/
 │   ├── w8_projector.pt    # bundled trained MLP projector weights (1.2 MB)
 │   ├── w8_results.json    # full LOOCV metrics

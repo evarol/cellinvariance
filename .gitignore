@@ -27,6 +27,7 @@ data/*
 # Heavy precomputed artifacts (regenerated on demand)
 *.npy
 *.npz
+viz/dino_repr_data.json
 
 # Model checkpoints, except the bundled w8 projector
 *.pt
