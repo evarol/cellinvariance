@@ -20,8 +20,9 @@ env/
 .mpl_cache/
 emb_cache_*/
 
-# Data (not bundled in repo)
-data/
+# Data (not bundled in repo, but keep the directory placeholder)
+data/*
+!data/.gitkeep
 
 # Heavy precomputed artifacts (regenerated on demand)
 *.npy

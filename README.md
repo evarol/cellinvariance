@@ -35,13 +35,14 @@ See [`results/findings.md`](results/findings.md) for the full write-up.
 
 ```bash
 uv sync
-uv run python scripts/reproduce_w8.py --skip-train  # regenerate viz from bundled projector (~10 min)
+uv run python scripts/download_data.py             # one-time: pull the 3 dataset files
+uv run python scripts/reproduce_w8.py --skip-train # regenerate viz from bundled projector (~10 min)
 ```
 
 The bundled [`viz/dino_repr_interactive.html`](viz/dino_repr_interactive.html)
-already shows the trained model. The line above re-derives it from
+already shows the trained model. The third line re-derives it from
 [`results/w8_projector.pt`](results/w8_projector.pt) by computing fresh DINO
-features.
+features over the data you just downloaded.
 
 Full retrain from scratch (first run takes 12–20 h on MPS to embed all
 augmented patches; subsequent runs are ~30 min):
@@ -75,7 +76,8 @@ three coupled panels:
 │   ├── augmentations.py # rotation augmentation presets
 │   └── alignment.py     # Sinkhorn cross-modality alignment loss
 ├── scripts/
-│   └── reproduce_w8.py  # end-to-end orchestrator (train → install → regen viz)
+│   ├── reproduce_w8.py  # end-to-end orchestrator (train → install → regen viz)
+│   └── download_data.py # fetch the 3 dataset files from Dropbox into data/
 ├── viz/
 │   ├── generate_data.py             # build the data JSON from a trained projector
 │   ├── generate_html.py             # render the data JSON to an interactive HTML
@@ -86,24 +88,36 @@ three coupled panels:
 │   ├── w8_folds.jsonl     # per-fold breakdown
 │   ├── w8_training.log    # original training log
 │   └── findings.md        # detailed write-up
+├── configs/
+│   └── rotation_domain_invariance.yaml  # dataset + patch + rotation config (vendored)
+├── data/                  # populated by scripts/download_data.py (gitignored)
 ├── pyproject.toml
 └── README.md
 ```
 
-## Data dependency
+## Data
 
-The training and visualization scripts read raw image volumes from a
-read-only `cellfind` checkout:
+The dataset config ships in [`configs/rotation_domain_invariance.yaml`](configs/rotation_domain_invariance.yaml)
+and points at `./data/`. The three raw image / landmark files live on Dropbox
+and are *not* committed:
 
-- `cellfind/configs/rotation_domain_invariance.yaml` (dataset config)
-- `cellfind/datasets/zstack.tif` (in vivo)
-- `cellfind/datasets/Sparrow_3_po_488_4x-registered.tif` (ex vivo)
-- `cellfind/datasets/slice3_to_invivoLANDMARKS.json` (115 paired landmarks)
+| File | Purpose | Dropbox |
+|---|---|---|
+| `slice3_to_invivoLANDMARKS.json` | 115 paired landmark coordinates | [download](https://www.dropbox.com/scl/fi/ou6q1b2czrruynnm5kc6v/slice3_to_invivoLANDMARKS.json?rlkey=qr1cymvkm5tkcnk35uq9165rn&dl=1) |
+| `zstack.tif` | in-vivo GCaMP volume | [download](https://www.dropbox.com/scl/fi/opfa4wetmw4w0tngr15qv/zstack.tif?rlkey=ddbopk6tumvi5phz9744xffhm&st=s1pn5ff4&dl=1) |
+| `Sparrow_3_po_488_4x-registered.tif` | ex-vivo registered volume | [download](https://www.dropbox.com/scl/fi/sgviwbb64qypjrjw0xtyg/Sparrow_3_po_488_4x-registered.tif?rlkey=wds9m9a1lx7rs9ebax3ukc6df&dl=1) |
 
-By default the code looks in `/Users/erdem/Documents/github/cellfind`. Set
-`CELLFIND_ROOT=/path/to/cellfind` to point elsewhere.
+Fetch all three into `data/` in one go:
 
-These files are *not* committed in this repo.
+```bash
+uv run python scripts/download_data.py
+```
+
+The script is idempotent — existing files are skipped. To put the data
+elsewhere, set `CELLINVARIANCE_DATA_DIR=/path/to/data` before running any
+script. The bundled `configs/rotation_domain_invariance.yaml` is preferred
+over a cellfind checkout, but if you have one you can still point at it via
+`CELLFIND_ROOT=/path/to/cellfind`.
 
 ## License
 

@@ -74,16 +74,33 @@ CELLFIND_ROOT    = Path(
     os.environ.get("CELLFIND_ROOT", "/Users/erdem/Documents/github/cellfind")
 )
 
-try:
-    import yaml
-    _cfg = yaml.safe_load(
-        (CELLFIND_ROOT / "configs" / "rotation_domain_invariance.yaml").read_text()
-    )
-    DATASET_DIR = Path(_cfg["dataset"]["dataset_dir"])
-except Exception as _e:
-    DATASET_DIR = CELLFIND_ROOT / "datasets"
-    print(f"[warn] Config fallback ({_e}): {DATASET_DIR}")
+# Try the bundled config first (configs/rotation_domain_invariance.yaml);
+# fall back to the cellfind source tree if it isn't present.
+_LOCAL_CFG    = PROJECT_ROOT / "configs" / "rotation_domain_invariance.yaml"
+_CELLFIND_CFG = CELLFIND_ROOT / "configs" / "rotation_domain_invariance.yaml"
 
+def _resolve_dataset_dir() -> Path:
+    # Explicit env var wins over everything.
+    env_dir = os.environ.get("CELLINVARIANCE_DATA_DIR")
+    if env_dir:
+        return Path(env_dir).expanduser().resolve()
+
+    cfg_path = _LOCAL_CFG if _LOCAL_CFG.exists() else _CELLFIND_CFG
+    try:
+        import yaml
+        _cfg = yaml.safe_load(cfg_path.read_text())
+        raw = Path(_cfg["dataset"]["dataset_dir"])
+    except Exception as _e:
+        print(f"[warn] Config fallback ({_e}): defaulting to {PROJECT_ROOT / 'data'}")
+        return PROJECT_ROOT / "data"
+
+    # Relative paths are resolved against the project root so the config can
+    # ship with `./data` and stay portable.
+    if not raw.is_absolute():
+        raw = (PROJECT_ROOT / raw).resolve()
+    return raw
+
+DATASET_DIR    = _resolve_dataset_dir()
 ZSTACK_PATH    = DATASET_DIR / "zstack.tif"
 EXVIVO_PATH    = DATASET_DIR / "Sparrow_3_po_488_4x-registered.tif"
 LANDMARKS_PATH = DATASET_DIR / "slice3_to_invivoLANDMARKS.json"

@@ -1,0 +1,55 @@
+seed: 23
+device: auto
+batch_size: 16
+
+dataset:
+  # Relative to the project root. Override with CELLINVARIANCE_DATA_DIR env var.
+  dataset_dir: ./data
+  zstack_tif: zstack.tif
+  landmarks_json: slice3_to_invivoLANDMARKS.json
+  invivo_channel_1based: 2
+  exvivo_channel_1based: 4
+
+model:
+  dino_model_id: facebook/dinov3-vitb16-pretrain-lvd1689m
+
+patch:
+  size: 100
+  context_size: 200
+  z_radius: 5
+  pad_mode: constant
+  pad_value: 0.0
+  interpolation: bilinear
+  antialias: false
+
+rotation:
+  strict_metric_mode: derotate_masked_common_region
+  angles_eval_deg: [0, 15, 30, 45, 60, 75, 90, 105, 120, 135, 150, 165, 180, 195, 210, 225, 240, 255, 270, 285, 300, 315, 330, 345]
+  angles_mask_deg: [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 115, 120, 125, 130, 135, 140, 145, 150, 155, 160, 165, 170, 175, 180, 185, 190, 195, 200, 205, 210, 215, 220, 225, 230, 235, 240, 245, 250, 255, 260, 265, 270, 275, 280, 285, 290, 295, 300, 305, 310, 315, 320, 325, 330, 335, 340, 345, 350, 355]
+  angles_fine_deg: [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 115, 120, 125, 130, 135, 140, 145, 150, 155, 160, 165, 170, 175, 180, 185, 190, 195, 200, 205, 210, 215, 220, 225, 230, 235, 240, 245, 250, 255, 260, 265, 270, 275, 280, 285, 290, 295, 300, 305, 310, 315, 320, 325, 330, 335, 340, 345, 350, 355]
+  ensemble_angles_deg: [0, 45, 90, 135, 180, 225, 270, 315]
+
+runtime:
+  eta_hours_cap: 10
+  ot_shortlist_k: 50
+  ot_max_queries: 115
+  a1_max_cells: 2000
+  a2_max_pairs: 2000
+
+head:
+  epochs: 300
+  batch_size: 64
+  lr: 0.001
+  rotation_consistency_weight: 0.25
+
+robustness:
+  corruptions:
+    - noise_gaussian
+    - noise_speckle
+    - gamma
+    - blur
+    - cutout
+    - occlusion_center
+    - occlusion_offcenter
+    - translate
+  severities: [0.0, 0.25, 0.5, 0.75, 1.0]
