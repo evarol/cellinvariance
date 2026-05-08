@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Virtualenvs
+.venv/
+venv/
+env/
+
+# Caches
+.feature_cache/
+.hf_cache/
+.mpl_cache/
+emb_cache_*/
+
+# Data (not bundled in repo)
+data/
+
+# Heavy precomputed artifacts (regenerated on demand)
+*.npy
+*.npz
+
+# Model checkpoints, except the bundled w8 projector
+*.pt
+*.pth
+!results/w8_projector.pt
+
+# Editor / OS junk
+.DS_Store
+.idea/
+.vscode/
+*.swp
